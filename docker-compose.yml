@@ -1,0 +1,46 @@
+version: '3.8'
+
+services:
+  web:
+    build:
+      context: .
+      dockerfile: web/Dockerfile
+    volumes:
+      - ./src:/usr/share/nginx/html
+      - ./web/www.conf:/etc/php-fpm.d/www.conf
+    ports:
+      - '5173:5173'
+    expose:
+      - 9000
+      - 5173
+    networks:
+      - app-network
+
+  nginx:
+    build:
+      context: .
+      dockerfile: nginx/Dockerfile
+    ports:
+      - '8443:443'
+      - '8085:80'
+    volumes:
+      - ./src:/usr/share/nginx/html:ro
+    depends_on:
+      - web
+    networks:
+      - app-network
+
+  mysql:
+    build:
+      context: .
+      dockerfile: mysql/Dockerfile
+    ports:
+      - '13306:3306'
+    expose:
+      - 3306
+    networks:
+      - app-network
+
+networks:
+  app-network:
+    driver: bridge
